@@ -149,7 +149,7 @@
         <div class="bg-gray-50 px-6 py-4 text-center">
             <p class="text-sm text-gray-600">
                 Já tem uma conta?
-                <a href="{{ route('user.login') }}" class="text-blue-600 font-medium hover:underline">Faça login</a>
+                <a href="{{ route('login') }}" class="text-blue-600 font-medium hover:underline">Faça login</a>
             </p>
         </div>
     </div>

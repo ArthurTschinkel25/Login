@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+
 use App\Service\UserService;
 use Illuminate\Http\Request;
-
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
     public function __construct(private UserService $loginService){
@@ -33,6 +35,7 @@ class UserController extends Controller
     public function Login(){
         return view('Users.login');
     }
+
     public function Create(Request $request)
     {
         $validated = $request->validate([
@@ -42,13 +45,16 @@ class UserController extends Controller
             'terms' => 'required'
         ], $this->messages);
 
-
-
         try {
-                $this->loginService->CreateUser($validated);
-                return redirect()->route('user.login')->with('success', 'Conta criada com sucesso!');
-            }
-         catch (\Exception $e) {
+            $user = $this->loginService->CreateUser($validated);
+
+            Auth::login($user);
+
+            event(new Registered($user));
+
+            return redirect()->route('verification.notice')->with('success', 'Conta criada com sucesso! Por favor, verifique seu e-mail.');
+
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erro ao criar uma conta: ' . $e->getMessage());
         }
     }
@@ -66,6 +72,10 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erro ao alterar a senha: ' . $e->getMessage());
         }
+    }
+    public function authenticate(Request $request){
+        $dados =  $request->all();
+
     }
 
 }

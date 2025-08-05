@@ -15,7 +15,7 @@
             <p class="text-blue-100 mt-1">Preencha os campos abaixo</p>
         </div>
 
-        <form class="p-6 space-y-6">
+        <form class="p-6 space-y-6" method="post" action="{{{ route('movies.index') }}}">
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
                 <div class="relative">
