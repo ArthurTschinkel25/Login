@@ -23,7 +23,8 @@ Route::get('/Login', [UserController::class, 'login'])->name('login');
 Route::get('/Alterar_senha', [UserController::class, 'ChangePassword'])->name('user.alterar_senha');
 Route::put('/Alterar_senha', [UserController::class, 'Update'])->name('user.update_senha');
 Route::post('/Register', [UserController::class, 'Create'])->name('user.create');
-Route::post('/Login', [UserController::class, 'authenticate'])->name('user.login');
+Route::post('/Login', [UserController::class, 'Authenticate'])->name('user.login');
+Route::post('/logout', [UserController::class, 'Logout'])->name('user.logout');
 
 
 Route::get('/email/verify', function () {

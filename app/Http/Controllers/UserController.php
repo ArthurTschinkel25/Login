@@ -74,7 +74,7 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Erro ao alterar a senha: ' . $e->getMessage());
         }
     }
-    public function authenticate(Request $request){
+    public function Authenticate(Request $request){
 
         $validated = $request->validate([
             'email' => 'required|string|email|max:255',
@@ -95,7 +95,7 @@ class UserController extends Controller
         }
 
     }
-    public function logout(){
+    public function Logout(){
         Auth::logout();
         return redirect()->route('user.login')->with('success', 'Você saiu da conta com sucesso!');
     }
