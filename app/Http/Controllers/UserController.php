@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 use App\Service\UserService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +29,7 @@ class UserController extends Controller
         return view('Users.cadastro');
     }
 
-    public function AlterarSenha(Request $request){
+    public function ChangePassword(Request $request){
         return view('Users.alterar_senha');
     }
 
@@ -41,7 +42,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'string', 'min:8', 'regex:/[A-Z]/', 'regex:/\W/'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/[A-Z]/', 'regex:/\W/'],
             'terms' => 'required'
         ], $this->messages);
 
@@ -74,8 +75,29 @@ class UserController extends Controller
         }
     }
     public function authenticate(Request $request){
-        $dados =  $request->all();
 
+        $validated = $request->validate([
+            'email' => 'required|string|email|max:255',
+            'password' => ['required', 'string', 'min:8', 'regex:/[A-Z]/', 'regex:/\W/'],
+        ], $this->messages);
+
+        try {
+            $user = $this->loginService->VerifyLogin($validated);
+            Auth::login($user);
+
+            return redirect()->route('movies.index');
+        }
+        catch (ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'E-mail não cadastrado.');
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+    }
+    public function logout(){
+        Auth::logout();
+        return redirect()->route('user.login')->with('success', 'Você saiu da conta com sucesso!');
     }
 
 }
