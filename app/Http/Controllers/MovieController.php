@@ -26,7 +26,6 @@ class MovieController extends Controller
             ]);
         }
 
-
         return view('Movies.movies', [
             'movies' => $movies
         ]);
@@ -66,25 +65,13 @@ class MovieController extends Controller
         echo "Os filmes foram salvos/atualizados no banco de dados com sucesso!\n";
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'duracao' => 'required|integer|min:1',
-            'nota' => 'required|numeric|between:0,10',
-            'genero' => 'required|string|max:100',
-        ]);
-
-        $this->movieService->storeMovie($validated);
-
-        return back()->with('success', 'Filme salvo com sucesso!');
-    }
-
     public function filter(Request $request)
     {
         $dados = $request->all();
 
-       $filteredMovies = $this->movieService->filterByRating($dados['filtroNota']);
+        $rating = (int) $dados['filtroNota'];
+
+        $filteredMovies = $this->movieService->filterByRating($rating);
 
         return back()->with('filteredMovies', $filteredMovies);
     }
