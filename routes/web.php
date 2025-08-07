@@ -18,9 +18,10 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
-    Route::get('/create-movies', [MovieController::class, 'create'])->name('movies.create');
     Route::delete('/movies/{movie}', [MovieController::class, 'destroy'])->name('movies.destroy');
     Route::post('/movies', [MovieController::class, 'store'])->name('movies.store');
+    Route::post('/movies/filter', [MovieController::class, 'filter'])->name('movies.filter');
+    Route::get('/movies/populateMoviesFromApi', [MovieController::class, 'populateMoviesFromApi'])->name('movies.populateMoviesFromApi');
 });
 
 // Rotas User

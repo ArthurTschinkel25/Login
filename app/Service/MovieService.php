@@ -20,10 +20,24 @@ class MovieService
         return Movie::all();
     }
 
-    public function getHighRatedMovies()
+    public function filterByRating(int $rating)
     {
-        return Movie::where('nota', '>', 5)
-            ->orderBy('nota', 'desc')
-            ->get();
+        $valorInicial = 0;
+        $valorFinal = 10;
+
+        if ($rating === 1) {
+            $valorInicial = 0;
+            $valorFinal = 3;
+        } elseif ($rating === 2) {
+            $valorInicial = 3;
+            $valorFinal = 6;
+        } elseif ($rating === 3) {
+            $valorInicial = 6;
+            $valorFinal = 10;
+        }
+
+        return Movie::whereBetween('vote_average', [$valorInicial, $valorFinal])->get();
     }
+
+
 }

@@ -3,7 +3,6 @@
 @section('title', 'Catálogo de Filmes')
 
 @section('content')
-
     <div class="container mx-auto px-4 py-8">
         <header class="mb-10 text-center">
             <h1 class="text-4xl font-bold text-primary mb-2">Catálogo de Filmes</h1>
@@ -19,111 +18,68 @@
             </div>
         @endif
 
-        <div class="rounded-lg shadow-md overflow-hidden bg-secondary border border-neutral-800">
-            <div class="overflow-x-auto bg-secondary">
-                <table class="min-w-full divide-y divide-neutral-800">
-                    <thead class="bg-neutral-900/50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
-                            Título
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
-                            Ano
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
-                            Gênero
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
-                            Duração
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
-                            Ações
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody class="bg-secondary divide-y divide-neutral-800">
-                    @foreach($movies as $movie)
-                        <tr class="hover:bg-neutral-800/50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <img class="h-10 w-10 rounded-full object-cover" src="{{ $movie->poster_url ?? 'https://via.placeholder.com/100' }}" alt="Poster">
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-text-main">{{ $movie->titulo }}</div>
-                                        <div class="text-sm text-text-light">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/70 text-yellow-300">
-                                                <i class="fas fa-star mr-1 text-yellow-400"></i> {{ $movie->avaliacao ?? 'N/A' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-light">
-                                {{ $movie->ano ?? 'N/A' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-900/70 text-blue-300">
-                                    {{ $movie->genero ?? 'N/A' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-light">
-                                {{ $movie->duracao ?? 'N/A' }} min
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    <a href="#" class="text-accent hover:text-green-400">
-                                        <i class="far fa-eye"></i> Ver
-                                    </a>
-                                    <form action="{{ route('movies.destroy', $movie->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-400" onclick="return confirm('Tem certeza que deseja excluir este filme?')">
-                                            <i class="far fa-trash-alt"></i> Excluir
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-            </div>
+        <form method="post" action="{{ route('movies.filter') }}">
+            @csrf
+            <select id="filtroNota" name="filtroNota">
+                <option value="1">0 - 3</option>
+                <option value="2">4 - 6</option>
+                <option value="3">7 - 8</option>
+                <option value="4">9 - 10</option>
+            </select>
 
-            <div class="bg-secondary px-4 py-3 flex items-center justify-between border-t border-neutral-800 sm:px-6">
-                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-sm text-text-light">
-                            Mostrando
-                            <span class="font-medium text-text-main">1</span>
-                            a
-                            <span class="font-medium text-text-main">10</span>
-                            de
-                            <span class="font-medium text-text-main">{{ count($movies) }}</span>
-                            resultados
-                        </p>
+            <button type="submit">Filtrar</button>
+        </form>
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            @foreach ($movies as $movie)
+
+                <div class="w-full bg-secondary rounded-xl shadow-2xl shadow-primary/10 overflow-hidden border border-neutral-800 hover:shadow-glow transition-all duration-300 group">
+                    <div class="relative aspect-[2/3] overflow-hidden">
+                        <img src="{{ $movie->poster_path ? 'https://image.tmdb.org/t/p/w500' .
+                            $movie->poster_path : 'https://via.placeholder.com/500x750.png?text=Sem+Imagem' }}"
+                             alt="Poster de {{ $movie->title }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+
+                        @if($movie->vote_average)
+                            <div class="absolute top-2 left-2 bg-primary/90 text-black px-2 py-1 rounded-full text-xs font-bold flex items-center">
+                                <i class="fas fa-star mr-1"></i> {{ number_format($movie->vote_average, 1) }}
+                            </div>
+                        @endif
+
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="bg-primary/90 hover:bg-primary text-black w-12 h-12 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-all">
+                                <i class="fas fa-play text-lg"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-neutral-700 bg-secondary text-sm font-medium text-text-light hover:bg-neutral-800/50">
-                                <span class="sr-only">Anterior</span>
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                            <a href="#" aria-current="page" class="z-10 bg-primary/20 border-primary text-primary relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                1
-                            </a>
-                            <a href="#" class="bg-secondary border-neutral-700 text-text-light hover:bg-neutral-800/50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                2
-                            </a>
-                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-neutral-700 bg-secondary text-sm font-medium text-text-light hover:bg-neutral-800/50">
-                                <span class="sr-only">Próximo</span>
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </nav>
+
+                    <div class="p-4">
+                        <h3 class="text-text-main font-bold truncate">{{ $movie->title }}</h3>
+                        <div class="flex justify-between items-center mt-1 text-xs text-text-light">
+                            <span>{{ date('Y', strtotime($movie->release_date)) }}</span>
+                            @if($movie->runtime)
+                                <span class="flex items-center">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    {{ floor($movie->runtime/60) }}h {{ $movie->runtime%60 }}m
+                                </span>
+                            @endif
+                        </div>
+
+                        @if($movie->genres && count($movie->genres) > 0)
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                @foreach($movie->genres->take(3) as $genre)
+                                    <span class="px-2 py-1 bg-neutral-900/50 text-text-light text-xs rounded-full">{{ $genre->name }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <button class="w-full mt-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-lg transition-colors flex items-center justify-center">
+                            <i class="far fa-bookmark mr-2"></i> Minha Lista
+                        </button>
                     </div>
                 </div>
-            </div>
+            @endforeach
         </div>
     </div>
-
 @endsection

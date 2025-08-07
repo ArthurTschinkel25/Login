@@ -8,31 +8,62 @@ use App\Models\Movie;
 class MovieController extends Controller
 {
 
-    public function __construct(private MovieService $movieService) {
+    public function __construct(private MovieService $movieService)
+    {
 
     }
 
     public function index()
     {
         $movies = $this->movieService->returnMovies();
+
+        $filteredMovies = session('filteredMovies');
+
+        if($filteredMovies)
+        {
+            return view('Movies.movies', [
+                'movies' => $filteredMovies
+            ]);
+        }
+
+
         return view('Movies.movies', [
             'movies' => $movies
         ]);
     }
 
-    public function create()
+    public function populateMoviesFromApi()
     {
-        return view('Movies.create-movies');
-    }
+        $apiKey = config('services.tmdb.key');
+        $allMovieIds = [];
 
-    public function destroy(Movie $movie)
-    {
-        try {
-            $this->movieService->deleteMovie($movie);
-            return redirect()->route('movies.index')->with('success', 'Filme excluído com sucesso!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erro ao excluir filme: ' . $e->getMessage());
+        for ($page = 1; $page <= 10; $page++) {
+            $apiUrl = "https://api.themoviedb.org/3/movie/popular?api_key={$apiKey}&language=pt-BR&page={$page}";
+            $response = @file_get_contents($apiUrl);
+
+            if ($response === false) {
+                echo "Erro ao buscar a página {$page}.\n";
+                continue;
+            }
+
+            $data = json_decode($response, true);
+
+            if (isset($data['results'])) {
+                foreach ($data['results'] as $movieData) {
+                    $allMovieIds[] = $movieData['id'];
+                    Movie::Where('id', $movieData['id']);
+
+
+                    Movie::updateOrCreate(
+                        ['id' => $movieData['id']],
+                        $movieData
+                    );
+                }
+            }
+            sleep(1);
         }
+
+        echo "Os filmes foram salvos/atualizados no banco de dados com sucesso!\n";
     }
 
     public function store(Request $request)
@@ -48,5 +79,15 @@ class MovieController extends Controller
 
         return back()->with('success', 'Filme salvo com sucesso!');
     }
+
+    public function filter(Request $request)
+    {
+        $dados = $request->all();
+
+       $filteredMovies = $this->movieService->filterByRating($dados['filtroNota']);
+
+        return back()->with('filteredMovies', $filteredMovies);
+    }
+
 
 }
