@@ -16,6 +16,8 @@ class UserService
 
     public function UpdateUser(array $data): void
     {
+        $user = User::where('email', $data['email'])->first();
+
         $user = User::where('email', $data['email'])->firstOrFail();
         $user->password = Hash::make($data['password']);
         $user->save();

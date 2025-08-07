@@ -55,7 +55,7 @@
             @endif
         </div>
 
-        <form class="p-6 space-y-6" method="post" action="{{{ route('user.login') }}}">
+        <form class="p-6 space-y-6" method="post" action="{{ route('user.login') }}">
             @csrf
             <div>
                 <label for="email" class="block text-sm font-medium text-text-light mb-2">E-mail</label>
@@ -91,10 +91,24 @@
                 </div>
             </div>
 
+            <div class="flex items-center">
+                <div class="flex-grow border-t border-neutral-700"></div>
+                <span class="mx-4 text-text-light text-sm">OU</span>
+                <div class="flex-grow border-t border-neutral-700"></div>
+            </div>
+
+            <a href="{{ url('/auth/redirect/google') }}" class="block">
+                <button type="button" class="w-full bg-white hover:bg-gray-100 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center shadow-lg shadow-neutral-800/20 hover:shadow-neutral-800/40">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5 mr-2">
+                    Continuar com Google
+                </button>
+            </a>
+
             <button type="submit"
                     class="w-full bg-primary hover:bg-green-400 text-black font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40">
                 <i class="fas fa-sign-in-alt mr-2"></i> Fazer Login
             </button>
+
             <div class="text-center space-y-2">
                 <p class="text-sm text-text-light">
                     Não tem uma conta? <a href="{{ route('user.register') }}" class="text-accent font-medium hover:underline">Crie uma agora</a>
