@@ -15,15 +15,42 @@ class MovieService
     }
     public function returnMovies()
     {
-        $movies = DB::table('movies')
-            ->join('genres', 'id', '=', 'movies.genre_ids')
-            ->select('movies.*', 'genres._genre_name as genre_name')
-            ->get();
-        var_dump($movies);
+        $movies = [];
 
-        return Movie::all();
+        $rows = DB::table('movies')
+            ->join('movie_genres', 'movies.id', '=', 'movie_genres.movie_id')
+            ->join('genres', 'movie_genres.genre_id', '=', 'genres.id')
+            ->select('movies.*', 'genres.genre_name as genre_name')
+            ->get();
+
+        foreach ($rows as $row) {
+            $id = $row->id;
+
+            if(!isset($movies[$id])){
+                $movies[$id] = [
+                    'title' => $row->title,
+                    'poster_path' => $row->poster_path,
+                    'overview' => $row->overview,
+                    'backdrop_path' => $row->backdrop_path,
+                    'release_date' => $row->release_date,
+                    'vote_average' => $row->vote_average,
+                    'vote_count' => $row->vote_count,
+                    'genres' => []
+                ];
+            }
+            $movies[$id]['genres'][] = $row->genre_name;
+        }
+
+        return $movies;
     }
 
+    public function dd($movies){
+        echo "<pre>";
+        print_r($movies);
+        echo "</pre>";
+        die;
+
+    }
     public function filterByRating(int $rating)
     {
         $query = Movie::query();

@@ -14,6 +14,7 @@ Route::get('/', function () {
     return view('Users/login');
 });
 
+
 // Rota filmes
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -22,7 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/movies', [MovieController::class, 'store'])->name('movies.store');
     Route::post('/movies/filter', [MovieController::class, 'filter'])->name('movies.filter');
     Route::get('/movies/populateMoviesFromApi', [MovieController::class, 'populateMoviesFromApi'])->name('movies.populateMoviesFromApi');
+    Route::get('/movies/populatedMoviesDetailsFromApi', [MovieController::class, 'populatedMoviesDetailsFromApi'])->name('movies.populatedMoviesDetailsFromApi');
 });
+
 
 // Rotas User
 

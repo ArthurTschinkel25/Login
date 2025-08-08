@@ -18,10 +18,8 @@
             </div>
         @endif
 
-        <!-- Filtros melhorados -->
         <div class="mb-8 bg-secondary/50 p-4 rounded-xl border border-neutral-800">
             <h2 class="text-xl font-semibold text-text-main mb-4">Filtrar por</h2>
-
             <form method="post" action="{{ route('movies.filter') }}" class="flex flex-col sm:flex-row gap-4 items-center">
                 @csrf
                 <div class="w-full sm:w-auto">
@@ -53,94 +51,81 @@
             </form>
         </div>
 
-        <!-- Contador de resultados -->
         <div class="mb-6 flex justify-between items-center">
             <p class="text-text-light">
-                Mostrando <span class="font-semibold text-text-main">{{ $movies->count() }}</span>
-                {{ $movies->count() === 1 ? 'filme' : 'filmes' }}
+                Mostrando <span class="font-semibold text-text-main">{{ $totalMovies }}</span>
+                {{ $totalMovies === 1 ? 'filme' : 'filmes' }}
             </p>
         </div>
 
-        @if($movies->count() > 0)
+        @if($totalMovies > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 @foreach ($movies as $movie)
-                    <div class="w-full bg-secondary rounded-xl shadow-2xl shadow-primary/10 overflow-hidden border border-neutral-800 hover:shadow-glow transition-all duration-300 group hover:-translate-y-1">
-                        <div class="relative aspect-[2/3] overflow-hidden">
-                            <img src="{{ $movie->poster_path ? 'https://image.tmdb.org/t/p/w500' . $movie->poster_path : 'https://via.placeholder.com/500x750.png?text=Sem+Imagem' }}"
-                                 alt="Poster de {{ $movie->title }}"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    {{-- Wrapper para posicionar o card em expansão sem quebrar a grade --}}
+                    <div class="relative aspect-[2/3]">
+                        {{-- O card agora tem seu próprio estado e eventos de mouse --}}
+                        <div x-data="{ expanded: false }"
+                             @mouseenter="expanded = true"
+                             @mouseleave="expanded = false"
+                             class="absolute inset-0 bg-secondary rounded-xl overflow-hidden border border-neutral-800 transition-all duration-300 ease-in-out"
+                             :class="{ 'z-20 scale-110 shadow-2xl shadow-primary/30': expanded, 'z-10': !expanded }">
 
-                            <!-- Avaliação com barra de progresso -->
-                            <div class="absolute top-2 left-2 w-10 h-10 flex items-center justify-center">
+                            {{-- Imagem do Pôster (base) --}}
+                            <img src="{{ !empty($movie['poster_path']) ? 'https://image.tmdb.org/t/p/w500' . $movie['poster_path'] : 'https://via.placeholder.com/500x750.png?text=Sem+Imagem' }}"
+                                 alt="Poster de {{ $movie['title'] }}"
+                                 class="w-full h-full object-cover">
+
+                            {{-- Círculo de avaliação (sempre visível) --}}
+                            <div class="absolute top-2 left-2 w-10 h-10 flex items-center justify-center" :class="{ 'opacity-50': expanded }">
                                 <svg class="w-full h-full" viewBox="0 0 36 36">
-                                    <path
-                                        d="M18 2.0845
-                                            a 15.9155 15.9155 0 0 1 0 31.831
-                                            a 15.9155 15.9155 0 0 1 0 -31.831"
-                                        fill="none"
-                                        stroke="#2d3748"
-                                        stroke-width="3"
-                                    />
-                                    <path
-                                        d="M18 2.0845
-                                            a 15.9155 15.9155 0 0 1 0 31.831
-                                            a 15.9155 15.9155 0 0 1 0 -31.831"
-                                        fill="none"
-                                        stroke="#f59e0b"
-                                        stroke-width="3"
-                                        stroke-dasharray="{{ ($movie->vote_average / 10) * 100 }}, 100"
-                                    />
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#2d3748" stroke-width="3"/>
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="{{ ($movie['vote_average'] / 10) * 100 }}, 100"/>
                                 </svg>
                                 <div class="absolute text-xs font-bold text-white">
-                                    {{ number_format($movie->vote_average, 1) }}
+                                    {{ number_format($movie['vote_average'], 1) }}
                                 </div>
                             </div>
 
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                                <div>
-                                    @if($movie->tagline)
-                                        <p class="text-text-light italic text-sm mb-2">"{{ $movie->tagline }}"</p>
-                                    @endif
-                                    <button class="w-full bg-primary hover:bg-primary/90 text-black font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                                        <i class="fas fa-play"></i> Assistir
+                            {{-- Título simples quando não está expandido --}}
+                            <div class="absolute bottom-0 p-4 w-full bg-gradient-to-t from-black/90 to-transparent transition-opacity duration-300" :class="{ 'opacity-0': expanded }">
+                                <h3 class="text-white font-bold truncate">{{ $movie['title'] }}</h3>
+                            </div>
+
+                            {{-- PAINEL DE DETALHES (aparece ao passar o mouse) --}}
+                            <div x-show="expanded"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="absolute inset-0 bg-black/80 backdrop-blur-sm p-4 flex flex-col text-white"
+                                 style="display: none;">
+
+                                <h3 class="text-lg font-bold text-primary">{{ $movie['title'] }}</h3>
+
+                                <div class="flex items-center gap-2 text-xs text-neutral-300 my-1">
+                                    <div class="flex items-center gap-1">
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <span>{{ number_format($movie['vote_average'], 1) }}</span>
+                                    </div>
+                                    <span>•</span>
+                                    <span>{{ !empty($movie['release_date']) ? date('Y', strtotime($movie['release_date'])) : 'N/A' }}</span>
+                                </div>
+
+                                <div class="flex flex-wrap gap-1 my-2">
+                                    @foreach(array_slice($movie['genres'], 0, 3) as $genre)
+                                        <span class="px-2 py-0.5 bg-white/10 text-neutral-300 text-[10px] rounded-full">{{ $genre }}</span>
+                                    @endforeach
+                                </div>
+
+                                <p class="text-xs text-neutral-300 flex-grow overflow-hidden">{{ Str::limit($movie['overview'], 200, '...') }}</p>
+
+                                <div class="mt-auto flex flex-col gap-2 pt-2">
+                                    <button class="w-full text-sm py-2 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors">
+                                        Ver Mais
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="p-4">
-                            <h3 class="text-text-main font-bold truncate" title="{{ $movie->title }}">{{ $movie->title }}</h3>
-                            <div class="flex justify-between items-center mt-1 text-xs text-text-light">
-                                <span>{{ $movie->release_date ? date('Y', strtotime($movie->release_date)) : 'N/A' }}</span>
-                                @if($movie->runtime)
-                                    <span class="flex items-center">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        {{ floor($movie->runtime/60) }}h {{ $movie->runtime%60 }}m
-                                    </span>
-                                @endif
-                            </div>
-
-                            @if($movie->genres && count($movie->genres) > 0)
-                                <div class="flex flex-wrap gap-1 mt-2">
-                                    @foreach($movie->genres->take(2) as $genre)
-                                        <span class="px-2 py-1 bg-neutral-900/50 text-text-light text-xs rounded-full">{{ $genre->name }}</span>
-                                    @endforeach
-                                    @if(count($movie->genres) > 2)
-                                        <span class="px-2 py-1 bg-neutral-900/50 text-text-light text-xs rounded-full">+{{ count($movie->genres) - 2 }}</span>
-                                    @endif
-                                </div>
-                            @endif
-
-                            <div class="mt-3 flex gap-2">
-                                <button class="flex-1 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
-                                    <i class="far fa-bookmark"></i>
-                                </button>
-                                <button class="flex-1 py-2 bg-neutral-700 hover:bg-neutral-600 text-text-light text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
-                                    <i class="far fa-star"></i>
-                                </button>
-                                <button class="flex-1 py-2 bg-neutral-700 hover:bg-neutral-600 text-text-light text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
-                                    <i class="fas fa-share-alt"></i>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -156,5 +141,8 @@
                 </a>
             </div>
         @endif
+
+        {{-- O MODAL EM TELA CHEIA FOI REMOVIDO DAQUI --}}
+
     </div>
 @endsection

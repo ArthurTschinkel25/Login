@@ -23,6 +23,9 @@
         "phpunit/phpunit": "^11.5.3"
     },
     "autoload": {
+        "files": [
+            "app/helpers.php"
+        ],
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
@@ -64,6 +67,7 @@
             "dont-discover": []
         }
     },
+
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
@@ -76,3 +80,4 @@
     "minimum-stability": "stable",
     "prefer-stable": true
 }
+
